@@ -1,4 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animation/AnimatedBuilderDemo.dart';
+import 'package:flutter_animation/AnimatedContainerDemo.dart';
+import 'package:flutter_animation/AnimatedCrossFadeDemo.dart';
+import 'package:flutter_animation/AnimatedIconDemo.dart';
+import 'package:flutter_animation/AnimatedListDemo.dart';
+import 'package:flutter_animation/AnimatedModalBarrierDemo.dart';
+import 'package:flutter_animation/AnimatedOpacityDemo.dart';
+import 'package:flutter_animation/AnimatedPhysicalModelDemo.dart';
+import 'package:flutter_animation/AnimatedPositionedDemo.dart';
+import 'package:flutter_animation/AnimatedSwitcherDemo.dart';
+import 'package:flutter_animation/DecoratedBoxTransitionDemo.dart';
+import 'package:flutter_animation/FadeTransitionDemo.dart';
+import 'package:flutter_animation/PositionedTransitionDemo.dart';
+import 'package:flutter_animation/RotationTransitionDemo.dart';
+import 'package:flutter_animation/SizeTransitionDemo.dart';
+import 'package:flutter_animation/SlideTransitionDemo.dart';
+
+import 'AnimatedDefaultTextStyleDemo.dart';
+import 'AnimatedSizeDemo.dart';
+import 'ScaleTransitionDemo.dart';
 
 void main() {
   runApp(MyApp());
@@ -73,34 +93,31 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Center(
+          child: Wrap(
+            children: <Widget>[
+              SlideTransitionDemo(),
+              AnimatedContainerDemo(),
+              AnimatedCrossFadeDemo(),
+              AnimatedBuilderDemo(),
+              DecoratedBoxTransitionDemo(),
+              FadeTransitionDemo(),
+              PositionedTransitionDemo(),
+              RotationTransitionDemo(),
+              ScaleTransitionDemo(),
+              SizeTransitionDemo(),
+              AnimatedDefaultTextStyleDemo(),
+              AnimatedListDemo(),
+              AnimatedModalBarrierDemo(),
+              AnimatedOpacityDemo(),
+              AnimatedPhysicalModelDemo(),
+              AnimatedPositionedDemo(),
+              AnimatedSizeDemo(),
+              AnimatedSwitcherDemo(),
+              AnimatedIconDemo(),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
