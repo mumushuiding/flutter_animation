@@ -1,24 +1,8 @@
+import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animation/AnimatedBuilderDemo.dart';
-import 'package:flutter_animation/AnimatedContainerDemo.dart';
-import 'package:flutter_animation/AnimatedCrossFadeDemo.dart';
-import 'package:flutter_animation/AnimatedIconDemo.dart';
-import 'package:flutter_animation/AnimatedListDemo.dart';
-import 'package:flutter_animation/AnimatedModalBarrierDemo.dart';
-import 'package:flutter_animation/AnimatedOpacityDemo.dart';
-import 'package:flutter_animation/AnimatedPhysicalModelDemo.dart';
-import 'package:flutter_animation/AnimatedPositionedDemo.dart';
-import 'package:flutter_animation/AnimatedSwitcherDemo.dart';
-import 'package:flutter_animation/DecoratedBoxTransitionDemo.dart';
-import 'package:flutter_animation/FadeTransitionDemo.dart';
-import 'package:flutter_animation/PositionedTransitionDemo.dart';
-import 'package:flutter_animation/RotationTransitionDemo.dart';
-import 'package:flutter_animation/SizeTransitionDemo.dart';
-import 'package:flutter_animation/SlideTransitionDemo.dart';
-
-import 'AnimatedDefaultTextStyleDemo.dart';
-import 'AnimatedSizeDemo.dart';
-import 'ScaleTransitionDemo.dart';
+import 'package:flutter_animation/basic_animation.dart';
+import 'package:flutter_animation/complex_animation.dart';
+import 'package:flutter_animation/widget/positioned_boom_menu.dart';
 
 void main() {
   runApp(MyApp());
@@ -31,15 +15,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
@@ -50,80 +25,138 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
   int _counter = 0;
+  int _selectIndex = 1;
+  List<Widget> pages;
+  Animation<double> animation;
+  AnimationController controller;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    pages = <Widget>[
+      BasicAnimation(),
+      ComplexAnimation(),
+    ];
+    controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 260),
+    );
+    animation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(curve: Curves.easeInOut, parent: controller));
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Wrap(
-            children: <Widget>[
-              SlideTransitionDemo(),
-              AnimatedContainerDemo(),
-              AnimatedCrossFadeDemo(),
-              AnimatedBuilderDemo(),
-              DecoratedBoxTransitionDemo(),
-              FadeTransitionDemo(),
-              PositionedTransitionDemo(),
-              RotationTransitionDemo(),
-              ScaleTransitionDemo(),
-              SizeTransitionDemo(),
-              AnimatedDefaultTextStyleDemo(),
-              AnimatedListDemo(),
-              AnimatedModalBarrierDemo(),
-              AnimatedOpacityDemo(),
-              AnimatedPhysicalModelDemo(),
-              AnimatedPositionedDemo(),
-              AnimatedSizeDemo(),
-              AnimatedSwitcherDemo(),
-              AnimatedIconDemo(),
-            ],
-          ),
+      drawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            UserAccountsDrawerHeader(
+              accountEmail: Text('wo shi Email'),
+              accountName: Text('我是Drawer'),
+              onDetailsPressed: () {},
+            ),
+            ListTile(
+              title: Text('基本动画'),
+              subtitle: Text(
+                '基本动画示例',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              leading: CircleAvatar(child: Text("1")),
+              onTap: () {
+                _selectIndex = 0;
+                setState(() {});
+              },
+            ),
+            Divider(), //分割线
+            ListTile(
+              title: Text('复杂动画'),
+              subtitle: Text(
+                '复杂动画示例',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              leading: CircleAvatar(child: Text("2")),
+              onTap: () {
+                _selectIndex = 1;
+                setState(() {});
+              },
+            ),
+            Divider(), //分割线
+          ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: Stack(
+        children: pages
+            .asMap()
+            .keys
+            .map((index) => Offstage(
+                  offstage: _selectIndex != index,
+                  child: TickerMode(
+                    enabled: _selectIndex == index,
+                    child: pages[index],
+                  ),
+                ))
+            .toList(),
+      ),
+      floatingActionButton: PositionedBoomMenu(
+        animatedIcon: AnimatedIcons.menu_close,
+        animatedIconTheme: IconThemeData(size: 22.0),
+        onOpen: () => print("open"),
+        onClose: () => print("close"),
+        scrollVisible: true,
+        overlayColor: Colors.black,
+        overlayOpacity: 0.7,
+        children: <BoomMenuItem>[
+          BoomMenuItem(
+//          child: Icon(Icons.accessibility, color: Colors.black, size: 40,),
+            child: Icon(Icons.ac_unit),
+            title: "Logout",
+            titleColor: Colors.grey[850],
+            subtitle: "Lorem ipsum dolor sit amet, consectetur",
+            subTitleColor: Colors.grey[850],
+            backgroundColor: Colors.grey[50],
+            onTap: () => print('THIRD CHILD'),
+          ),
+          BoomMenuItem(
+            child: Icon(Icons.ac_unit),
+            title: "List",
+            titleColor: Colors.white,
+            subtitle: "Lorem ipsum dolor sit amet, consectetur",
+            subTitleColor: Colors.white,
+            backgroundColor: Colors.pinkAccent,
+            onTap: () => print('FOURTH CHILD'),
+          ),
+          BoomMenuItem(
+            child: Icon(Icons.ac_unit),
+            title: "Team",
+            titleColor: Colors.grey[850],
+            subtitle: "Lorem ipsum dolor sit amet, consectetur",
+            subTitleColor: Colors.grey[850],
+            backgroundColor: Colors.grey[50],
+            onTap: () => print('THIRD CHILD'),
+          ),
+          BoomMenuItem(
+            child: Icon(Icons.ac_unit),
+            title: "Profile",
+            titleColor: Colors.white,
+            subtitle: "Lorem ipsum dolor sit amet, consectetur",
+            subTitleColor: Colors.white,
+            backgroundColor: Colors.blue,
+            onTap: () => print('FOURTH CHILD'),
+          )
+        ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
