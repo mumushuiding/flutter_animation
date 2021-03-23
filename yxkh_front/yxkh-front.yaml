@@ -1,0 +1,45 @@
+###################################################
+# 前端 oms-front
+##################################################
+kind: Service
+apiVersion: v1
+metadata:
+  name: yxkh-front
+spec:
+  selector:
+    app: yxkh-front
+  ports:
+  #service虚拟端口
+  - port: 8080
+    protocol: TCP
+    #各node节点开启的端口，端口范围 30000-32767
+    nodePort: 30002
+  type: NodePort      #type 为nodePort 外部网络才能访问
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yxkh-front
+spec:
+  replicas: 1
+  minReadySeconds: 5
+  selector:
+    matchLabels:
+      app: yxkh-front
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: yxkh-front
+    spec:
+      containers:
+      - name: yxkh-front
+        image: registry.cn-hangzhou.aliyuncs.com/mumushuiding/yxkhfront
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "800Mi"
+            cpu: "200m"
+        ports:
+        - containerPort: 8080
