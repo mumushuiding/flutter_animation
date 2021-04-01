@@ -30,6 +30,8 @@ class _DashboardWidgetState extends State<DashboardWidget> with AutomaticKeepAli
   List<RouteHandler> drawerItems;
   dynamic token;
   bool isLogin = false;
+  bool hasUserinfo = true;
+  bool needLogin = false;
   Widget _getPages(int index) {
     if (pages[index] == null) {
       pages[index] = drawerItems[index].handler();
@@ -53,11 +55,11 @@ class _DashboardWidgetState extends State<DashboardWidget> with AutomaticKeepAli
       pages = List(drawerItems.length);
       pages[0] = (drawerItems[0].handler());
     }
+    _login();
   }
 
   // 判断是否登陆
   Future<bool> _isLogin() async {
-    // token不为空
     if (token != null) {
       await App.getUserByToken(token: token);
     } else {
@@ -67,6 +69,33 @@ class _DashboardWidgetState extends State<DashboardWidget> with AutomaticKeepAli
     }
     if (App.getToken() != null) return true;
     return false;
+  }
+
+  // 判断是否登陆
+  void _login() {
+    if (token != null) {
+      if (App.userinfos.user == null) {
+        hasUserinfo = false;
+      }
+      App.getUserByToken(token: token).then((d) {
+        setState(() {
+          hasUserinfo = true;
+        });
+      });
+    } else {
+      if (App.getToken() != null) {
+        App.getUserByToken(token: App.getToken()).then((d) {
+          setState(() {
+            token = App.getToken();
+            hasUserinfo = true;
+          });
+        });
+      } else {
+        setState(() {
+          needLogin = true;
+        });
+      }
+    }
   }
 
   Widget _buildPage() {
@@ -153,40 +182,73 @@ class _DashboardWidgetState extends State<DashboardWidget> with AutomaticKeepAli
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return FutureBuilder(
-      future: _isLogin(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.data) {
-            print("是否登陆:${snapshot.data}");
-            return _buildPage();
-          }
-          print("未登陆");
-          return LoginPage(
-            onLogin: (account, password) {
-              App.login(account, password).then((data) {
-                if (data != null) {
-                  App.showAlertError(context, data);
-                  return;
-                }
-                if (App.userinfos.user.email == null) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) {
-                      return ChangeEmailWidget();
-                    },
-                  ));
-                }
-              });
-            },
-          );
-        } else {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-      },
-    );
+    return token == null
+        ? (needLogin
+            ? LoginPage(
+                onLogin: (account, password) {
+                  App.login(account, password).then((data) {
+                    if (data != null) {
+                      App.showAlertError(context, data);
+                      return;
+                    }
+                    if (App.userinfos.user.email == null) {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) {
+                          return ChangeEmailWidget();
+                        },
+                      ));
+                    } else {
+                      App.router.navigateTo(context, Routes.YxkhDashboard);
+                    }
+                  });
+                },
+              )
+            : Center(
+                child: CircularProgressIndicator(),
+              ))
+        : (hasUserinfo
+            ? _buildPage()
+            : Center(
+                child: CircularProgressIndicator(),
+              ));
   }
+  // @override
+  // Widget build(BuildContext context) {
+  //   super.build(context);
+  //   return FutureBuilder(
+  //     future: _isLogin(),
+  //     builder: (context, snapshot) {
+  //       if (snapshot.connectionState == ConnectionState.done) {
+  //         if (snapshot.data) {
+  //           return _buildPage();
+  //         }
+  //         return LoginPage(
+  //           onLogin: (account, password) {
+  //             App.login(account, password).then((data) {
+  //               if (data != null) {
+  //                 App.showAlertError(context, data);
+  //                 return;
+  //               }
+  //               if (App.userinfos.user.email == null) {
+  //                 Navigator.of(context).push(MaterialPageRoute(
+  //                   builder: (context) {
+  //                     return ChangeEmailWidget();
+  //                   },
+  //                 ));
+  //               } else {
+  //                 App.router.navigateTo(context, Routes.YxkhDashboard);
+  //               }
+  //             });
+  //           },
+  //         );
+  //       } else {
+  //         return Center(
+  //           child: CircularProgressIndicator(),
+  //         );
+  //       }
+  //     },
+  //   );
+  // }
 
   @override
   bool get wantKeepAlive => true;

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:yxkh_front/api/user_api.dart';
 import 'package:yxkh_front/theme.dart';
+
+import '../../app.dart';
 
 class SignInPage extends StatefulWidget {
   final Function onLogin;
@@ -78,12 +81,49 @@ class _SignInPageState extends State<SignInPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: new Text(
-                  "忘记密码?",
-                  style: new TextStyle(fontSize: 16, color: Colors.white, decoration: TextDecoration.underline),
-                ),
-              ),
+                  padding: const EdgeInsets.only(top: 10),
+                  child: InkWell(
+                    child: new Text(
+                      "忘记密码?",
+                      style: new TextStyle(fontSize: 16, color: Colors.white, decoration: TextDecoration.underline),
+                    ),
+                    onTap: () {
+                      String email = "";
+                      App.showAlertDialog(
+                          context,
+                          Text("找回密码"),
+                          Container(
+                            child: TextFormField(
+                              onChanged: (value) {
+                                email = value;
+                              },
+                              decoration: InputDecoration(
+                                  icon: Icon(
+                                    Icons.email,
+                                    color: Colors.black,
+                                  ),
+                                  hintText: "请输入邮箱",
+                                  border: InputBorder.none),
+                              style: TextStyle(fontSize: 16, color: Colors.black),
+                            ),
+                          ), callback: () {
+                        if (email.isNotEmpty) {
+                          UserAPI.forgetPassword(email).then((d) {
+                            if (d["status"] != 200) {
+                              App.showAlertError(context, d["message"]);
+                              return;
+                            }
+                            App.showAlertInfo(context, "成功，新密码已发送至邮箱，请查阅");
+                          });
+                        }
+                      });
+                      // Navigator.of(context).push(MaterialPageRoute(
+                      //   builder: (context) {
+                      //     return ForgetPasswordPage();
+                      //   },
+                      // ));
+                    },
+                  )),
 
               // /**
               //  * 显示第三方登录的按钮

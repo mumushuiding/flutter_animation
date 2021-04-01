@@ -34,9 +34,6 @@ class HttpRequest {
   }
 
   Future<void> download(String uri, dynamic body, {Map<String, String> headers}) async {
-    //  headers=Map();
-    //  headers["Content-Type"]="application/octet-stream";
-    // //  headers["Content-Disposition"]="attachment;filename=export.csv";
     http.Response response = await client.post(uri, body: body);
     Element elink = document.createElement("a");
     elink.setAttribute("download", "export.csv");
@@ -48,7 +45,7 @@ class HttpRequest {
     elink.remove();
   }
 
-  Future<void> upload({String uri, String method}) async {
+  Future<void> upload({String uri, String method, String token, String checked}) async {
     InputElement uploadInput = FileUploadInputElement();
     uploadInput.click();
     uploadInput.onChange.listen((e) {
@@ -56,6 +53,8 @@ class HttpRequest {
       var formData = html.FormData();
       formData.appendBlob("filename", files[0].slice(), files[0].name);
       formData.append("method", method);
+      formData.append("token", token);
+      formData.append("checked", checked);
       var req = html.HttpRequest();
       req.open("POST", uri);
       req.send(formData);

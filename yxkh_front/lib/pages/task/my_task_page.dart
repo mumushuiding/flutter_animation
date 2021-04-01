@@ -11,11 +11,25 @@ import '../../app.dart';
 import '../../apply_router.dart';
 import '../widget/search_task_widget.dart';
 
-class MyTaskPageWidget extends StatelessWidget {
+class MyTaskPageWidget extends StatefulWidget {
   final FlowTaskBlocImpl bloc;
   MyTaskPageWidget({Key key, this.bloc})
       : assert(bloc != null),
         super(key: key);
+  @override
+  State<StatefulWidget> createState() {
+    return _MyTaskPageWidgetState();
+  }
+}
+
+class _MyTaskPageWidgetState extends State<MyTaskPageWidget> {
+  FlowTaskBlocImpl bloc;
+  @override
+  void initState() {
+    bloc = widget.bloc;
+    super.initState();
+  }
+
   List<Widget> _actions(BuildContext context) {
     return <Widget>[
       IconButtonCountDown(
@@ -59,7 +73,17 @@ class MyTaskPageWidget extends StatelessWidget {
               App.showAlertError(context, "只有考核组考核员才能导入");
               return;
             }
-            YxkhAPI.importMarks();
+            YxkhAPI.importMarks(checked: "0");
+          }),
+      FlatButton.icon(
+          label: Text("导入加减分(直接生效)"),
+          icon: Icon(Icons.import_export),
+          onPressed: () {
+            if (App.userinfos.labels.indexWhere((l) => l.labelname.contains("考核办")) == -1) {
+              App.showAlertError(context, "只有考核办才能导入");
+              return;
+            }
+            YxkhAPI.importMarks(checked: "1");
           })
     ];
   }
@@ -95,45 +119,24 @@ class MyTaskPageWidget extends StatelessWidget {
                   onSelected: (val) {
                     switch (val) {
                       case "审批":
-                        if (value["businessType"] == "月度考核" ||
-                            value["businessType"] == "半年考核" ||
-                            value["businessType"] == "年度考核" ||
-                            value["businessType"] == "责任清单") {
-                          YxkhAPI.findFlowDatas(value["processInstanceId"], value["businessType"]).then((data) {
-                            if (data["status"] != 200) {
-                              App.showAlertError(context, data["message"]);
-                              return;
-                            }
-                            var datas = ResponseData.fromResponse(data);
-                            if (datas[0] == null) {
-                              App.showAlertError(context, "内容不存在");
-                              return;
-                            }
-                            ApplyHandler.applyRoute(
-                              context,
-                              value["businessType"],
-                              bloc,
-                              e: Evaluation.fromJson(datas[0]),
-                              process: Process.fromJson(value),
-                            );
-                          });
-                        }
-
+                        Process p = Process.fromJson(value);
+                        bloc.lookupProcess(context, p);
                         break;
                       case "进度":
-                        UserAPI.getFlowStepper(value["processInstanceId"]).then((data) {
-                          if (data["status"] != 200) {
-                            App.showAlertError(context, data["message"]);
-                            return;
-                          }
-                          var datas = ResponseData.fromResponse(data);
-                          App.showAlertDialog(
-                              context,
-                              Text("进度"),
-                              FlowStepperWidget(
-                                data: datas[0],
-                              ));
-                        });
+                        bloc.lookupFlowStepper(context, value["processInstanceId"]);
+                        // UserAPI.getFlowStepper(value["processInstanceId"]).then((data) {
+                        //   if (data["status"] != 200) {
+                        //     App.showAlertError(context, data["message"]);
+                        //     return;
+                        //   }
+                        //   var datas = ResponseData.fromResponse(data);
+                        //   App.showAlertDialog(
+                        //       context,
+                        //       Text("进度"),
+                        //       FlowStepperWidget(
+                        //         data: datas[0],
+                        //       ));
+                        // });
                         break;
                       default:
                     }

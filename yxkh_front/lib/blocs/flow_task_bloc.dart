@@ -1,8 +1,15 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:yxkh_front/api/response_data.dart';
 import 'package:yxkh_front/api/user_api.dart';
 import 'package:yxkh_front/api/yxkh_api.dart';
+import 'package:yxkh_front/pages/apply/FlowPage.dart';
+import 'package:yxkh_front/widget/flow_stepper.dart';
 
 import '../app.dart';
+import '../apply_router.dart';
 
 // 待审批页面业务数据管理模块
 abstract class FlowTaskBloc {
@@ -23,6 +30,10 @@ abstract class FlowTaskBloc {
   void onCompleteTask(dynamic process, dynamic log);
   void onAddTaskHistory(dynamic process, dynamic flowlog);
   void onAddTask(dynamic process);
+  // 查看流程
+  void lookupProcess(BuildContext context, Process process);
+  // 查看进度
+  void lookupFlowStepper(BuildContext context, String processInstanceId);
   void dispose();
 }
 
@@ -141,5 +152,81 @@ class FlowTaskBlocImpl implements FlowTaskBloc {
       _curTaskList[index] = process;
     }
     _taskList.add(_curTaskList);
+  }
+
+  @override
+  void lookupProcess(BuildContext context, Process p) {
+    if (p.businessType == "月度考核" || p.businessType == "半年考核" || p.businessType == "年度考核" || p.businessType == "责任清单") {
+      YxkhAPI.findFlowDatas(p.processInstanceId, p.businessType).then((data) {
+        if (data["status"] != 200) {
+          App.showAlertError(context, data["message"]);
+          return;
+        }
+        var datas = ResponseData.fromResponse(data);
+        if (datas[0] == null) {
+          App.showAlertError(context, "内容不存在");
+          return;
+        }
+        ApplyHandler.applyRoute(
+          context,
+          p.businessType,
+          this,
+          e: Evaluation.fromJson(datas[0]),
+          process: p,
+        );
+      });
+    } else {
+      YxkhAPI.findFlowDatas(p.processInstanceId, p.businessType).then((data) {
+        if (data["status"] != 200) {
+          App.showAlertError(context, data["message"]);
+          return;
+        }
+        var datas = ResponseData.fromResponse(data);
+        if (datas[0] == null) {
+          App.showAlertError(context, "内容不存在");
+          return;
+        }
+        var d = jsonDecode(datas[0]["data"]);
+        var size = MediaQuery.of(context).size;
+        double _width = 400;
+        double _height = 600;
+        if (size.width < 500) {
+          _width = size.width;
+          _height = size.height;
+        }
+        App.showAlertDialog(
+            context,
+            Text("查看流程"),
+            SingleChildScrollView(
+              child: Container(
+                width: _width,
+                height: _height,
+                child: FlowPage(
+                  bloc: this,
+                  process: p,
+                  reason: d["reason"],
+                ),
+              ),
+            ),
+            showActions: false);
+      });
+    }
+  }
+
+  @override
+  void lookupFlowStepper(BuildContext context, String processInstanceId) {
+    UserAPI.getFlowStepper(processInstanceId).then((data) {
+      if (data["status"] != 200) {
+        App.showAlertError(context, data["message"]);
+        return;
+      }
+      var datas = ResponseData.fromResponse(data);
+      App.showAlertDialog(
+          context,
+          Text("进度"),
+          FlowStepperWidget(
+            data: datas[0],
+          ));
+    });
   }
 }

@@ -129,6 +129,8 @@ class _SideBarMenuState extends State<SideBarMenu> with SingleTickerProviderStat
                               (_animation.value >= 250)
                                   ? Text(
                                       _user.position == null ? "空" : "职位:${_user.position}",
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: Colors.grey,

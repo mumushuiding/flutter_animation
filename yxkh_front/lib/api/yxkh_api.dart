@@ -32,15 +32,22 @@ class YxkhAPI {
         }));
   }
 
-  // 审批流程
-  static Future<dynamic> completeProcess(Map<String, dynamic> data, String businessType, int perform) {
+  // 审批流程 perform,2、3、4、5 分别表示:通过、驳回、转审、撤消
+  static Future<dynamic> completeProcess(Map<String, dynamic> data, String businessType, int perform,
+      {String speech, String processInstanceId}) {
     return App.request.post(
         API.base + "/yxkh/getData",
         jsonEncode({
           "header": {"token": App.getToken()},
           "body": {
             "method": "exec/yxkh/completeProcess",
-            "params": {"perform": perform, "businessType": businessType, "data": data}
+            "params": {
+              "perform": perform,
+              "processInstanceId": processInstanceId,
+              "businessType": businessType,
+              "data": data,
+              "speech": speech
+            }
           }
         }));
   }
@@ -218,12 +225,14 @@ class YxkhAPI {
 
   // 导入群众评议
   static Future<dynamic> importPulicAssessment() {
-    return App.request.upload(uri: API.base + "/yxkh/import", method: "exec/yxkh/importPublicAssess");
+    return App.request
+        .upload(token: App.getToken(), uri: API.base + "/yxkh/import", method: "exec/yxkh/importPublicAssess");
   }
 
 // importMarks 导入加减分
-  static Future<dynamic> importMarks() {
-    return App.request.upload(uri: API.base + "/yxkh/import", method: "exec/yxkh/importMarks");
+  static Future<dynamic> importMarks({String checked}) {
+    return App.request.upload(
+        token: App.getToken(), uri: API.base + "/yxkh/import", method: "exec/yxkh/importMarks", checked: checked);
   }
 }
 

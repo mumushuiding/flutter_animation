@@ -11,6 +11,7 @@ import 'package:yxkh_front/pages/apply/before_addmonth_widget.dart';
 import 'package:yxkh_front/pages/apply/year_form_widget.dart';
 import 'package:yxkh_front/pages/widget/apply_tree_widget.dart';
 import 'package:yxkh_front/pages/widget/search_apply_widget.dart';
+import 'package:yxkh_front/pages/widget/user_dic_search_widget.dart';
 import 'package:yxkh_front/widget/flow_stepper.dart';
 import 'package:yxkh_front/widget/select.dart';
 
@@ -66,6 +67,99 @@ class _MonthPageState extends State<MonthPage> {
   }
 
   void applyMonth(String title) async {
+    // 查询是否是考核组成员
+    if (!App.hasAssessmentGroupTag()) {
+      String label = "";
+      App.showAlertDialog(
+          context,
+          Text("设置考核组"),
+          Container(
+            width: 300,
+            height: 400,
+            child: Column(
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(5),
+                  child: Row(
+                    children: <Widget>[Icon(Icons.error), Text("不是考核组成员,无法填写月度考核!!")],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(5),
+                  child: Row(
+                    children: <Widget>[Icon(Icons.settings), Text("设置考核组")],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(5),
+                  child: Select(
+                    inputDecoration: InputDecoration(
+                      prefixIcon: Icon(Icons.group),
+                      hintText: "选择考核组",
+                    ),
+                    items: [
+                      {"key": "第一考核组成员", "value": "第一考核组成员"},
+                      {"key": "第二考核组成员", "value": "第二考核组成员"},
+                      {"key": "第三考核组成员", "value": "第三考核组成员"},
+                      {"key": "第四考核组成员", "value": "第四考核组成员"}
+                    ],
+                    onChange: (keys, vals) {
+                      label = vals;
+                    },
+                    valueTag: "value",
+                    keyTag: "key",
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(5),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(Icons.search),
+                      Text(
+                        "查询同事所在考核组",
+                        style: TextStyle(color: Colors.grey),
+                      )
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(5),
+                  child: UserDicSearchWidget(
+                    type: "考核组",
+                    textFieldWidth: 280,
+                    callback: (vals) {
+                      label = vals[0]["tagName"];
+                    },
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.all(5),
+                  alignment: Alignment.center,
+                  child: MaterialButton(
+                    elevation: 0,
+                    color: Colors.green,
+                    child: Text("确定"),
+                    onPressed: () {
+                      if (label == "") {
+                        return;
+                      }
+                      UserAPI.addUserLabel(userid: App.userinfos.user.id, labelname: label).then((d) {
+                        if (d["status"] != 200) {
+                          App.showAlertError(context, d["message"]);
+                          return;
+                        }
+                        App.userinfos.labels.add(Label(0, label, ""));
+                        App.getUserByToken(token: App.getToken());
+                        Navigator.of(context).pop();
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ));
+      return;
+    }
     // 查询流程是否已经存在
     var data = await UserAPI.findAllFlow(title: App.userinfos.user.name + "-" + title);
     var datas = ResponseData.fromResponse(data);
@@ -267,77 +361,11 @@ class ProcessDataTableSource extends DataTableSource {
               case "查看":
                 // onLookup?.call(data[index]);
                 Process p = data[index];
-                if (p.businessType == "月度考核" ||
-                    p.businessType == "半年考核" ||
-                    p.businessType == "年度考核" ||
-                    p.businessType == "责任清单") {
-                  YxkhAPI.findFlowDatas(p.processInstanceId, p.businessType).then((data) {
-                    if (data["status"] != 200) {
-                      App.showAlertError(context, data["message"]);
-                      return;
-                    }
-                    var datas = ResponseData.fromResponse(data);
-                    if (datas[0] == null) {
-                      App.showAlertError(context, "内容不存在");
-                      return;
-                    }
-                    ApplyHandler.applyRoute(
-                      context,
-                      p.businessType,
-                      bloc,
-                      e: Evaluation.fromJson(datas[0]),
-                      process: p,
-                    );
-                  });
-                } else {
-                  YxkhAPI.findFlowDatas(p.processInstanceId, p.businessType).then((data) {
-                    if (data["status"] != 200) {
-                      App.showAlertError(context, data["message"]);
-                      return;
-                    }
-                    var datas = ResponseData.fromResponse(data);
-                    if (datas[0] == null) {
-                      App.showAlertError(context, "内容不存在");
-                      return;
-                    }
-                    var d = jsonDecode(datas[0]["data"]);
-                    var size = MediaQuery.of(context).size;
-                    double _width = 400;
-                    double _height = 600;
-                    if (size.width < 500) {
-                      _width = size.width;
-                      _height = size.height;
-                    }
-                    App.showAlertDialog(
-                        context,
-                        Text("查看流程"),
-                        Container(
-                          width: _width,
-                          height: _height,
-                          child: FlowPage(
-                            bloc: bloc,
-                            process: p,
-                            reason: d["reason"],
-                          ),
-                        ));
-                  });
-                }
-
+                bloc.lookupProcess(context, p);
                 break;
               case "进度":
-                UserAPI.getFlowStepper(data[index].processInstanceId).then((data) {
-                  if (data["status"] != 200) {
-                    App.showAlertError(context, data["message"]);
-                    return;
-                  }
-                  var datas = ResponseData.fromResponse(data);
-                  App.showAlertDialog(
-                      context,
-                      Text("进度"),
-                      FlowStepperWidget(
-                        data: datas[0],
-                      ));
-                });
+                bloc.lookupFlowStepper(context, data[index].processInstanceId);
+
                 break;
               case "撤回":
                 UserAPI.completeFlowTask(data[index].processInstanceId, data[index].businessType, 5).then((data) {

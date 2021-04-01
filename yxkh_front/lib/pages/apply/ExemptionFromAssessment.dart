@@ -5,7 +5,6 @@ import 'package:yxkh_front/api/user_api.dart';
 import 'package:yxkh_front/api/yxkh_api.dart';
 import 'package:yxkh_front/blocs/flow_task_bloc.dart';
 import 'package:yxkh_front/theme.dart';
-import 'package:yxkh_front/utils/screenUtil.dart';
 import 'package:yxkh_front/widget/flow_stepper.dart';
 
 import '../../app.dart';
@@ -28,6 +27,8 @@ class _ExemptionFromAssessmentState extends State<ExemptionFromAssessment> {
   String reason;
   final _formKey = GlobalKey<FormState>();
   Widget message;
+  int tagId = 0;
+  bool committed = false;
   @override
   void initState() {
     message = Padding(
@@ -44,8 +45,22 @@ class _ExemptionFromAssessmentState extends State<ExemptionFromAssessment> {
   }
 
   void _startProcess(dynamic destinationUser) {
+    if (committed) {
+      App.showAlertError(context, "不要重复提交");
+      return;
+    }
+    committed = true;
+    Future.delayed(Duration(seconds: 5), () {
+      committed = false;
+    });
+    if (tagId == 0) {
+      App.showAlertError(context, "用户没有考核组标签，已经不需要考核");
+      return;
+    }
     var ds = {
-      "destinationUser": destinationUser,
+      "uid": destinationUser["id"],
+      // 获取考核组标签id
+      "tagId": tagId,
       "reason": "${destinationUser["departmentname"]}-${destinationUser["name"]}设置为不考核\n原因：$reason"
     };
     YxkhAPI.startProcess(ds, "${destinationUser["name"]}-不考核设置", "002d5df2a737dd36a2e78314b07d0bb1_1591669930", "不考核设置")
@@ -153,7 +168,19 @@ class _ExemptionFromAssessmentState extends State<ExemptionFromAssessment> {
                       );
                       return null;
                     }
-                    _startProcess(datas[0]);
+                    UserAPI.findUserLabel(labeltype: "考核组", userid: datas[0]["id"]).then((l) {
+                      if (l["status"] != 200) {
+                        App.showAlertError(context, l["message"]);
+                        return;
+                      }
+                      var ds2 = ResponseData.fromResponse(l);
+                      var ls = ds2[0][0];
+                      print(ls);
+                      if (ls != null) {
+                        tagId = ls["id"];
+                      }
+                      _startProcess(datas[0]);
+                    });
                   });
                   return null;
                 },

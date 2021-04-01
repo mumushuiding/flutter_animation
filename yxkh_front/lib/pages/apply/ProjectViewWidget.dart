@@ -193,11 +193,26 @@ class ProjectRowWidget extends StatelessWidget {
   ProjectRowWidget({Key key, this.p, this.bloc, this.username})
       : assert(bloc != null, username != null),
         super(key: key);
+  bool _showActions() {
+    bool showActions = false;
+    if (bloc.candidate == null) {
+      if (p.userId == App.userinfos.user.id) {
+        showActions = true;
+      }
+    } else {
+      if (bloc.candidate.indexOf(App.userinfos.user.userid) != -1) {
+        showActions = true;
+      }
+    }
+    return showActions;
+  }
 
   @override
   Widget build(BuildContext context) {
+    print("candidate:${bloc.candidate},curuser:${App.userinfos.user.userid}");
     var height = 80.0;
     if (p.marks != null && p.marks.length > 0) height = 80.0 * p.marks.length;
+
     return Container(
       decoration: DashboardTheme.allBoxDecoration,
       child: Flex(
@@ -206,7 +221,7 @@ class ProjectRowWidget extends StatelessWidget {
           Flexible(
               flex: 1,
               fit: FlexFit.tight,
-              child: bloc.candidate == App.userinfos.user.userid
+              child: _showActions()
                   ? Container(
                       height: height,
                       alignment: Alignment.topLeft,

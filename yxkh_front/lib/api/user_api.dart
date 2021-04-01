@@ -28,9 +28,19 @@ class UserAPI {
         API.base + "/user/getData",
         jsonEncode({
           "header": {"token": App.getToken()},
+          "body": {"method": "exec/user/forgetPass", "metrics": email}
+        }));
+  }
+
+// 修改用户信息
+  static Future<dynamic> updateUserinfo(int userid, {String email}) {
+    return App.request.post(
+        API.base + "/user/getData",
+        jsonEncode({
           "body": {
-            "method": "exec/user/forgetPass",
-            "metrics": {"email": email}
+            "method": "exec/user/update",
+            "user_id": userid,
+            "params": {"email": email}
           }
         }));
   }
@@ -55,6 +65,31 @@ class UserAPI {
           "body": {
             "method": "visit/user/getUsers",
             "username": username,
+          }
+        }));
+  }
+
+  //查询用户标签 {"body":{"method":"visit/label/findall","params":{"userid":334,"labeltype":"考核组"}}}
+  static Future<dynamic> findUserLabel({int userid, String labeltype}) {
+    // print(API.base+"/user/getData");
+    return App.request.post(
+        API.base + "/user/getData",
+        jsonEncode({
+          "body": {
+            "method": "visit/label/findall",
+            "params": {"userid": userid, "labeltype": labeltype},
+          }
+        }));
+  }
+
+// 用户添加标签
+  static Future<dynamic> addUserLabel({int userid, String labelname}) {
+    return App.request.post(
+        API.base + "/user/getData",
+        jsonEncode({
+          "body": {
+            "method": "exec/user/addlabel2",
+            "params": {"uid": userid, "labelname": labelname},
           }
         }));
   }
@@ -165,6 +200,18 @@ class UserAPI {
         API.base + "/user/getData",
         jsonEncode({
           "body": {"method": "visit/flow/log", "paged": true, "params": params}
+        }));
+  }
+
+// findLogSpeechByThirdNo 查询审批意见
+  static Future<dynamic> findLogSpeechByThirdNo(String thirdNo) {
+    return App.request.post(
+        API.base + "/user/getData",
+        jsonEncode({
+          "body": {
+            "method": "visit/flow/findLogSpeechByThirdNo",
+            "params": {"thirdNo": thirdNo}
+          }
         }));
   }
 

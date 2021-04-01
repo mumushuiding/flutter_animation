@@ -44,7 +44,10 @@ class SelectBlocImpl implements SelectBloc {
     if (initValue != null) {
       initValue.forEach((val) {
         int index = items.indexWhere((item) => item[valueTag] == val);
-        if (index != -1) items[index]["selected"] = true;
+        if (index != -1) {
+          items[index]["selected"] = true;
+          selected.add(items[index]);
+        }
       });
     }
     // print("初始化:$initDatas");
@@ -208,7 +211,7 @@ class _SelectState extends State<Select> {
       minLines: widget.minlines,
       decoration: widget.inputDecoration ??
           InputDecoration(
-            hintText: widget.hintText == null ? "点击" : widget.hintText,
+            hintText: widget.hintText ?? "点击",
             contentPadding: EdgeInsets.all(10),
           ),
       readOnly: true,
@@ -376,7 +379,6 @@ class SelectDialog extends StatelessWidget {
                               Navigator.pop(context);
                             } else {
                               bloc.onSelected(item);
-
                               onChange.call(bloc.selected);
                             }
                           });

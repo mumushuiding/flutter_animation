@@ -24,7 +24,6 @@ class App {
 
   // 加载配置
   static Future<void> loadConf() async {
-    print('加载配置信息');
     // http连接
     request = HttpRequest(http.Client());
     // 变量
@@ -55,6 +54,15 @@ class App {
   static logOut() {
     App.setToken(null);
     App.userinfos = Userinfos();
+  }
+
+// 用户是否包含考核组标签，如“第一考核组成员”、“第二考核组成员”
+  static bool hasAssessmentGroupTag() {
+    var labels = userinfos.labels;
+    if (labels == null || labels.length == 0) {
+      return false;
+    }
+    return labels.indexWhere((l) => l.labelname.startsWith("第") && l.labelname.endsWith("考核组成员")) != -1 ? true : false;
   }
 
   static Future<void> getUserByToken({String token}) async {

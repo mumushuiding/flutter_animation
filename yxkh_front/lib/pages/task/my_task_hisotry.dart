@@ -74,6 +74,7 @@ class MyTaskHistoryPageWidget extends StatelessWidget {
                   }
                   return result;
                 }),
+                ColumnData("审批意见", "speech"),
                 ColumnData("审批时间", "opTime", formatter: (val) {
                   var datetime = DateTime.fromMillisecondsSinceEpoch(int.parse("${val}000"));
                   return datetime.toString();

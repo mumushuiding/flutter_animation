@@ -44,7 +44,7 @@ class FlowProcessCard extends StatelessWidget {
     bool completed = false;
     items.forEach((item) {
       userBuffer.write(",${item["itemName"]}");
-      if (item["ItemStatus"] != 0) {
+      if (item["ItemStatus"] != 0 && item["ItemStatus"] != 1) {
         completed = true;
       }
     });

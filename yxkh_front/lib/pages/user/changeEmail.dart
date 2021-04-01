@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:yxkh_front/api/user_api.dart';
 import 'package:yxkh_front/theme.dart';
+
+import '../../app.dart';
+import '../../routes.dart';
 
 class ChangeEmailWidget extends StatefulWidget {
   @override
@@ -12,7 +16,7 @@ class _ChangeEmailWidgetState extends State<ChangeEmailWidget> {
   FocusNode emailFocusNode = FocusNode();
   FocusNode passFocusNode = FocusNode();
   FocusNode focusScopeNode = FocusScopeNode();
-  GlobalKey<FormState> _formKey = GlobalKey();
+  final _formKey = GlobalKey<FormState>();
   bool isShow = false;
   String pass = "";
   String email = "";
@@ -62,43 +66,12 @@ class _ChangeEmailWidgetState extends State<ChangeEmailWidget> {
                                   ),
                                   hintText: "邮箱",
                                 ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            height: 1,
-                            width: 250,
-                            color: Colors.grey[400],
-                          ),
-                          Flexible(
-                            child: Padding(
-                              padding: EdgeInsets.only(left: 25, right: 25, top: 10),
-                              child: TextFormField(
-                                focusNode: passFocusNode,
-                                decoration: InputDecoration(
-                                  icon: Icon(
-                                    Icons.vpn_key,
-                                    color: Colors.black,
-                                  ),
-                                  hintText: "密码",
-                                  border: InputBorder.none,
-                                  suffixIcon: IconButton(
-                                    icon: Icon(Icons.remove_red_eye),
-                                    color: Colors.black,
-                                    onPressed: () {
-                                      isShow = !isShow;
-                                      setState(() {});
-                                    },
-                                  ),
-                                ),
-                                obscureText: !isShow,
-                                style: TextStyle(fontSize: 16, color: Colors.black),
                                 onChanged: (value) {
-                                  pass = value;
+                                  email = value;
                                 },
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return "密码不能为空";
+                                    return "邮箱不能为空";
                                   }
                                   return "";
                                 },
@@ -110,13 +83,24 @@ class _ChangeEmailWidgetState extends State<ChangeEmailWidget> {
                             width: 250,
                             color: Colors.grey[400],
                           ),
+                          Container(
+                            height: 1,
+                            width: 250,
+                            color: Colors.grey[400],
+                          ),
                           GestureDetector(
                             onTap: () {
-                              if (_formKey.currentState.validate()) {
-                                _formKey.currentState.save();
-                              }
-                              if (email.isNotEmpty && pass.isNotEmpty) {
-                                // 验证密码
+                              if (email.isNotEmpty) {
+                                UserAPI.updateUserinfo(App.userinfos.user.id, email: email).then((d) {
+                                  if (d["status"] != 200) {
+                                    App.showAlertError(context, d["message"]);
+                                    return;
+                                  }
+                                  App.showAlertInfo(context, "成功");
+                                  App.router.navigateTo(context, Routes.YxkhDashboard);
+                                });
+                              } else {
+                                return;
                               }
                             },
                             child: Container(
