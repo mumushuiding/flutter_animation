@@ -140,7 +140,7 @@ class Select extends StatefulWidget {
   // 对应json值的key
   final String keyTag;
   // 第一个参数返回选择的key,第二个参数返回选择的值
-  final Function(dynamic, dynamic) onChange;
+  final Function(dynamic keys, dynamic vals) onChange;
   final Future<List<dynamic>> Function(String filterStr) getRemoteDataFunc;
   final int minlines;
   final int maxlines;
@@ -164,7 +164,7 @@ class Select extends StatefulWidget {
       this.hintText,
       this.textEditingController,
       this.enabled,
-      this.valueTag,
+      @required this.valueTag,
       this.keyTag,
       this.multiple = false,
       this.initValue})

@@ -21,7 +21,9 @@ class ApplyTreeWidget extends StatelessWidget {
       {
         "name": "我的申请",
         "children": [
-          {"name": "用户不考核设置"}
+          {"name": "用户不考核设置"},
+          {"name": "删除超时扣分"},
+          {"name": "添加加减分"}
         ],
       },
     ];
@@ -76,8 +78,10 @@ class ApplyTreeWidget extends StatelessWidget {
         semanticLabel: "点击添加",
       ),
       onChange: (ids, text) {
-        Navigator.of(context).pop();
-        callback.call(text);
+        if (text != null) {
+          Navigator.of(context).pop();
+          callback?.call(text);
+        } else {}
       },
     );
   }

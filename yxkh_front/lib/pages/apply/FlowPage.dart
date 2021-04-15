@@ -15,7 +15,8 @@ class FlowPage extends StatefulWidget {
   final Process process;
   final FlowTaskBlocImpl bloc;
   final dynamic reason;
-  FlowPage({@required this.process, @required this.bloc, this.reason});
+  final List<dynamic> datas;
+  FlowPage({@required this.process, @required this.bloc, this.reason, this.datas});
   @override
   State<StatefulWidget> createState() {
     return _FlowPageState();
@@ -122,6 +123,71 @@ class _FlowPageState extends State<FlowPage> {
     });
   }
 
+  Widget _buildDatasCard() {
+    if (widget.datas == null || widget.datas.length == 0) {
+      return Container();
+    }
+    List<Widget> rs = List();
+    widget.datas.forEach((d) {
+      List<Widget> ms = List();
+      d.forEach((k, v) {
+        if (v != null) {
+          ms.add(
+            Container(
+              padding: EdgeInsets.only(left: 5, top: 5),
+              alignment: Alignment.centerLeft,
+              child: Column(
+                children: <Widget>[
+                  v.length < 15
+                      ? Container(
+                          child: Row(
+                            children: <Widget>[
+                              Text(
+                                "$k：",
+                                style: TextStyle(color: Colors.grey, fontSize: 14),
+                              ),
+                              Text(
+                                "$v",
+                                style: TextStyle(color: Color(0xFF18233C), fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        )
+                      : Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                "$k：",
+                                style: TextStyle(color: Colors.grey, fontSize: 14),
+                              ),
+                              Text(
+                                "$v",
+                                style: TextStyle(color: Color(0xFF18233C), fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        ),
+                ],
+              ),
+            ),
+          );
+        }
+      });
+      rs.add(Card(
+        elevation: 1,
+        child: Container(
+          padding: EdgeInsets.all(10),
+          child: Column(children: ms),
+        ),
+      ));
+    });
+    return Container(
+      child: Column(children: rs),
+    );
+  }
+
   void _completeProcess(int perform) {
     YxkhAPI.completeProcess(null, widget.process.businessType, perform,
             speech: speech, processInstanceId: widget.process.processInstanceId)
@@ -169,7 +235,7 @@ class _FlowPageState extends State<FlowPage> {
                             alignment: Alignment.centerLeft,
                             padding: EdgeInsets.all(10),
                             child: Text(
-                              "$reason",
+                              "${reason ?? ''}",
                               style: TextStyle(fontSize: 16, color: Color(0xFF18233C)),
                             ),
                           ),
@@ -177,6 +243,29 @@ class _FlowPageState extends State<FlowPage> {
                       ),
                     ),
                   ),
+                  widget.datas == null
+                      ? Container()
+                      : Card(
+                          child: Container(
+                            child: Column(
+                              children: <Widget>[
+                                Container(
+                                  padding: EdgeInsets.all(10),
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    "流程数据",
+                                    style: TextStyle(fontSize: 18, color: Color(0xFF18233C)),
+                                  ),
+                                ),
+                                Container(
+                                  color: Color(0xFFE8EAEC),
+                                  height: 1,
+                                ),
+                                _buildDatasCard(),
+                              ],
+                            ),
+                          ),
+                        ),
                   FlowProcessCard(
                     datas: flowProcess,
                   ),

@@ -1,31 +1,43 @@
 // ResponseData 用于接收从后台返回的数据
-class ResponseData{
+import 'package:flutter/cupertino.dart';
+
+import '../app.dart';
+
+class ResponseData {
   TBody body;
   THeader header;
-  ResponseData(){
+  ResponseData() {
     body = TBody();
     header = THeader();
   }
-  Map<String,dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data["body"] = this.body.toJson();
-    data["header"]=this.header.toJson();
+    data["header"] = this.header.toJson();
     return data;
   }
 
-  ResponseData.fromJson(Map<String, dynamic> json){
+  ResponseData.fromJson(Map<String, dynamic> json) {
     body = TBody.fromJson(json["body"]);
     header = THeader.fromJson(json["header"]);
   }
-  static List<dynamic>  fromResponse(Map<String,dynamic> data){
-    if (data["status"]!=200){
+  static List<dynamic> fromResponse(Map<String, dynamic> data) {
+    if (data["status"] != 200) {
       print("err:${data["message"]}");
       return null;
     }
-    ResponseData rd=ResponseData.fromJson(data["message"]);
+    ResponseData rd = ResponseData.fromJson(data["message"]);
     return rd.body.data;
   }
 
+  static List<dynamic> fromResponseByContext(BuildContext context, Map<String, dynamic> data) {
+    if (data["status"] != 200) {
+      App.showAlertError(context, data["message"]);
+      return null;
+    }
+    ResponseData rd = ResponseData.fromJson(data["message"]);
+    return rd.body.data;
+  }
   // static List<T>  fromResponse<T>(Map<String,dynamic> data){
   //   if (data["status"]!=200){
   //     print("err:${data["message"]}");
@@ -40,7 +52,8 @@ class ResponseData{
 
   // }
 }
-class TBody{
+
+class TBody {
   int total;
   int startIndex;
   int maxResults;
@@ -51,8 +64,8 @@ class TBody{
   String metrics;
   var data;
   TBody();
-  TBody.fromJson(Map<String, dynamic> json){
-    if (json==null) return;
+  TBody.fromJson(Map<String, dynamic> json) {
+    if (json == null) return;
     total = json['total'];
     startIndex = json['start_index'];
     maxResults = json['max_results'];
@@ -62,9 +75,8 @@ class TBody{
     userName = json['username'];
     metrics = json['metrics'];
     data = json["data"];
-    
   }
-  Map<String,dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map();
     data["total"] = this.total;
     data["start_index"] = this.startIndex;
@@ -79,19 +91,20 @@ class TBody{
   }
 }
 
-class THeader{
+class THeader {
   String token;
   String msg;
   THeader();
-  Map<String,dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map();
-    data["token"]=this.token;
-    data["msg"]=this.msg;
+    data["token"] = this.token;
+    data["msg"] = this.msg;
     return data;
   }
-  THeader.fromJson(Map<String,dynamic> json){
-    if (json==null) return;
-    token=json["token"];
-    msg=json["msg"];
+
+  THeader.fromJson(Map<String, dynamic> json) {
+    if (json == null) return;
+    token = json["token"];
+    msg = json["msg"];
   }
 }

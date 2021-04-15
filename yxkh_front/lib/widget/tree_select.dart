@@ -225,8 +225,7 @@ class _TreeSelectState extends State<TreeSelect> {
                   context,
                   bloc: bloc,
                   onChange: (ids, text) {
-                    // print("select dialog:ids:$ids,text:$text");
-                    bloc.textEditingController.text = "${text.join(",")}";
+                    if (text != null) bloc.textEditingController.text = "${text.join(",")}";
                     widget.onChange?.call(ids, text);
                   },
                 );
@@ -254,10 +253,11 @@ class TreeSelectDialog extends StatelessWidget {
             onPressed: () {
               if (!bloc.multiple) {
                 Navigator.of(context).pop();
+                onChange?.call(null, null);
               } else {
                 bloc.onClear();
+                onChange?.call([], []);
               }
-              onChange([], []);
             },
           ),
           content: TreeSelectDialog(

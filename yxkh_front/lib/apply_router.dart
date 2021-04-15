@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:yxkh_front/api/yxkh_api.dart';
 import 'package:yxkh_front/app.dart';
+import 'package:yxkh_front/pages/apply/myApply/AddMarksWidget.dart';
+import 'package:yxkh_front/pages/apply/myApply/DelMarksSubmitOverTime.dart';
 import 'package:yxkh_front/pages/apply/DutyFormWidget.dart';
 import 'package:yxkh_front/pages/apply/ExemptionFromAssessment.dart';
 import 'package:yxkh_front/pages/apply/addmonth.dart';
@@ -54,6 +56,17 @@ List<ApplyHandler> applyRouter = <ApplyHandler>[
             buinessType: buinessType,
             process: process,
           )),
+  ApplyHandler(
+    title: "删除超时扣分",
+    showInDialogue: true,
+    handler: ({bloc, buinessType, e, process}) =>
+        DelMarksSubmitOverTime(bloc: bloc, buinessType: "DelMarksSubmitOverTime", process: process),
+  ),
+  ApplyHandler(
+    title: "添加加减分",
+    showInDialogue: true,
+    handler: ({bloc, buinessType, e, process}) => AddMarksWidget(bloc: bloc, buinessType: "AddMarks", process: process),
+  )
 ];
 
 class ApplyHandler {

@@ -98,6 +98,23 @@ class YxkhAPI {
         }));
   }
 
+// 查询延迟提交的扣分
+  static Future<dynamic> findMarkDelaySubmit(int userid) {
+    return App.request.post(
+        API.base + "/yxkh/getData",
+        jsonEncode({
+          "body": {
+            "method": "visit/yxkh/findallMarks",
+            "params": {
+              "limit": 6,
+              "userId": userid,
+              "fields": "distinct startDate,projectId",
+              "accordingly": "月度考核延迟提交产生扣分"
+            }
+          }
+        }));
+  }
+
 // 添加上月项目
   static Future<dynamic> addLastMonthProject(int userid) {
     return App.request.post(
@@ -143,6 +160,18 @@ class YxkhAPI {
           "body": {
             "method": "exec/yxkh/updateProject",
             "params": {"data": project.toJson()}
+          }
+        }));
+  }
+
+// 添加项目和及项目评分
+  static Future<dynamic> addProjectWithMark(List<Mark> marks) {
+    return App.request.post(
+        API.base + "/yxkh/getData",
+        jsonEncode({
+          "body": {
+            "method": "exec/yxkh/addProjectWithMark",
+            "params": {"data": marks.map((m) => m.toJson()).toList()}
           }
         }));
   }
@@ -294,6 +323,7 @@ class Mark {
   String markNumber;
   String markReason;
   String accordingly;
+
   Mark(this.projectId, this.markNumber, this.markReason, this.accordingly);
   Mark.fromJson(Map<String, dynamic> json) {
     markId = json["markId"];

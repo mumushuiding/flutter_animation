@@ -30,10 +30,14 @@ abstract class FlowTaskBloc {
   void onCompleteTask(dynamic process, dynamic log);
   void onAddTaskHistory(dynamic process, dynamic flowlog);
   void onAddTask(dynamic process);
+  void addTask(BuildContext context, Map<String, dynamic> data);
   // 查看流程
   void lookupProcess(BuildContext context, Process process);
   // 查看进度
   void lookupFlowStepper(BuildContext context, String processInstanceId);
+  // 生成流程
+  void startProcess(BuildContext context, Map<String, dynamic> data, String title, String templateId, businessType,
+      {int perform});
   void dispose();
 }
 
@@ -205,6 +209,7 @@ class FlowTaskBlocImpl implements FlowTaskBloc {
                   bloc: this,
                   process: p,
                   reason: d["reason"],
+                  datas: d["datas"],
                 ),
               ),
             ),
@@ -227,6 +232,46 @@ class FlowTaskBlocImpl implements FlowTaskBloc {
           FlowStepperWidget(
             data: datas[0],
           ));
+    });
+  }
+
+  @override
+  void addTask(BuildContext context, Map<String, dynamic> data) {
+    if (data["status"] == 200) {
+      var datas = ResponseData.fromResponse(data);
+      this.onAddTask(datas[1]);
+
+      App.showAlertDialog(
+          context,
+          Text("审批进度"),
+          FlowStepperWidget(
+            data: datas[0],
+          ), callback: () {
+        Navigator.of(context).pop();
+      });
+    } else {
+      App.showAlertError(context, data["message"]);
+    }
+  }
+
+  @override
+  void startProcess(BuildContext context, Map<String, dynamic> data, String title, String templateId, businessType,
+      {int perform}) {
+    YxkhAPI.startProcess(data, title, templateId, businessType, perform: perform).then((data) {
+      if (data["status"] == 200) {
+        var datas = ResponseData.fromResponse(data);
+        this.onAddTask(datas[1]);
+        App.showAlertDialog(
+            context,
+            Text("审批进度"),
+            FlowStepperWidget(
+              data: datas[0],
+            ), callback: () {
+          Navigator.of(context).pop();
+        });
+      } else {
+        App.showAlertError(context, data["message"]);
+      }
     });
   }
 }
